@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: bet-matcher-service
+
+  datasource:
+    url: jdbc:h2:mem:matcherdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: validate
+      jdbc:
+        batch_size: 50
+      order_inserts: true
+      order_updates: true
+    show-sql: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: bet-matcher-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: com.sporty.matcher.dto.EventOutcomeDto
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: "false"
+
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: bet-matcher-producer-group
+
+server:
+  port: 8082
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
+  level:
+    com.sporty.matcher: DEBUG
+    org.apache.rocketmq: WARN
+    org.apache.kafka: WARN

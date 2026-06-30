@@ -1,0 +1,5 @@
+rootProject.name = 'sporty-betting'
+
+include 'event-outcome-service'
+include 'bet-matcher-service'
+include 'settlement-service'

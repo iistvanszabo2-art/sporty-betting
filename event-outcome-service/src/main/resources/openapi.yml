@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: Event Outcome Service API
+  description: Records the outcome of a sporting event and publishes it via Kafka.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081/api/v1
+    description: Local development
+
+tags:
+  - name: EventOutcome
+    description: Event outcome operations
+
+paths:
+  /event-outcomes:
+    post:
+      tags:
+        - EventOutcome
+      summary: Record and publish an event outcome
+      description: >
+        Persists the outcome of a sporting event and queues it for publication to Kafka.
+        Returns 409 if an outcome for the event already exists, 404 if the event is unknown.
+      operationId: recordEventOutcome
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventOutcomeDto'
+      responses:
+        '202':
+          description: Outcome accepted and queued for publication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventOutcomeResponse'
+        '400':
+          description: Invalid request body (validation failure)
+        '404':
+          description: Event not found
+        '409':
+          description: Outcome already recorded for this event
+
+components:
+  schemas:
+    EventOutcomeResponse:
+      type: object
+      properties:
+        eventId:
+          type: integer
+          format: int64
+          example: 1
+        status:
+          type: string
+          example: ACCEPTED
+
+    EventOutcomeDto:
+      type: object
+      required:
+        - eventId
+        - eventName
+        - eventWinnerId
+      properties:
+        eventId:
+          type: integer
+          format: int64
+          description: Unique identifier of the event
+          minimum: 1
+          example: 1
+        eventName:
+          type: string
+          description: Human-readable name of the event
+          minLength: 1
+          maxLength: 255
+          example: Champions League Final
+        eventWinnerId:
+          type: integer
+          format: int64
+          description: Identifier of the winning participant
+          minimum: 1
+          example: 10
